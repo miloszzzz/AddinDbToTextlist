@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Siemens.Engineering;
 
-namespace AddinExportAll.Helpers
+namespace AddinDbToTextlist.Helpers
 {
     public class LogToFile
     {

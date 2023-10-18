@@ -3,6 +3,7 @@ using Siemens.Engineering.AddIn.Menu;
 using Siemens.Engineering.HW;
 using Siemens.Engineering.SW;
 using Siemens.Engineering;
+using Siemens.Engineering.Hmi;
 using System.Windows.Forms;
 using Siemens.Engineering.SW.Blocks;
 using Siemens.Engineering.SW.Tags;
@@ -10,14 +11,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System;
+using System.Xml;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using AddinExportAll.Helpers;
+using AddinDbToTextlist.Helpers;
 using static TiaHelperLibrary.TiaHelper;
+using System.Xml.Serialization;
+using AddinDbToTextlist.Models;
 
 
 
-namespace AddinExportAll
+namespace AddinDbToTextlist
 {
     public class AddIn : ContextMenuAddIn
     {
@@ -92,16 +96,16 @@ namespace AddinExportAll
              *          displayed if a rightclick on the project name 
              *          will be performed in TIA Portal
             */
-            addInRootSubmenu.Items.AddActionItem<Project>(
-                "Test", OnDoSomething, OnCanSomething);
+            /*addInRootSubmenu.Items.AddActionItem<Project>(
+                "Test", OnDoSomething, OnCanSomething);*/
 
             /*addInRootSubmenu.Items.AddActionItem<DeviceItem>(
-                "Test", OnDoSomething, OnCanSomething);
+                "Test", OnDoSomething, OnCanSomething);*/
 
             addInRootSubmenu.Items.AddActionItem<PlcBlock>(
                 "Test", OnDoSomething, OnCanSomething);
 
-            addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
+            /*addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
                 "Test", OnDoSomething, OnCanSomething);*/
         }
 
@@ -118,7 +122,7 @@ namespace AddinExportAll
         {
             try
             {
-                GetProjectName(menuSelectionProvider);
+                DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex) 
             { 
@@ -131,7 +135,7 @@ namespace AddinExportAll
         {
             try
             {
-                GetProjectName(menuSelectionProvider);
+                DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex)
             {
@@ -144,7 +148,7 @@ namespace AddinExportAll
         {
             try
             {
-                GetProjectName(menuSelectionProvider);
+                DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex)
             {
@@ -157,7 +161,7 @@ namespace AddinExportAll
         {
             try
             {
-                GetProjectName(menuSelectionProvider);
+                DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex)
             {
@@ -176,12 +180,20 @@ namespace AddinExportAll
         private MenuStatus OnCanSomething(MenuSelectionProvider<Project> menuSelectionProvider)
         {
             //enable the button
-            return MenuStatus.Enabled;
+            return MenuStatus.Disabled;
         }
 
         private MenuStatus OnCanSomething(MenuSelectionProvider<PlcBlock> menuSelectionProvider)
         {
             //enable the button
+            PlcBlock selection = (PlcBlock)menuSelectionProvider.GetSelection().FirstOrDefault();
+
+
+            if (selection.ProgrammingLanguage is ProgrammingLanguage.DB)
+            {
+                return MenuStatus.Enabled;
+            }
+
             return MenuStatus.Disabled;
         }
 
@@ -218,7 +230,10 @@ namespace AddinExportAll
                         .DeviceItems.FirstOrDefault(plc => plc.Name.Length > 0)
                         .GetService<SoftwareContainer>().Software as PlcSoftware;
                     // return the program blocks folder*/
-                    return _tiaportal.Projects;
+                    PlcBlockGroup blockGroup = GetGroupByBlockName(software.BlockGroup, "DB_StatusDef");
+
+
+                    return blockGroup.Blocks.Where<PlcBlock>(b => b.ProgrammingLanguage == ProgrammingLanguage.DB);
 
                 default:
                     return Enumerable.Empty<IEngineeringObject>();
@@ -238,11 +253,70 @@ namespace AddinExportAll
         }
 
 
-        public void GetProjectName(MenuSelectionProvider menuSelectionProvider)
+        public void DbToTextlist(MenuSelectionProvider menuSelectionProvider)
         {           
             PlcSoftware software = GetPlcSoftware(menuSelectionProvider);
 
-            MessageBox.Show(software.Name);
+            PlcBlock block = menuSelectionProvider.GetSelection<PlcBlock>().FirstOrDefault();
+
+            // File to export
+            FileInfo xmlFilePath = new FileInfo(Path.GetTempFileName() + ".xml");
+            block.Export(xmlFilePath, ExportOptions.WithDefaults);
+
+
+            // Dictionary with statuses - only one description per status number
+            string xmlData = File.ReadAllText(xmlFilePath.FullName);
+
+            XmlSerializer serializer = new XmlSerializer(typeof(Document));
+
+            // Include Structure name?
+
+            using (StringReader reader = new StringReader(xmlData))
+            {
+                Document document = (Document)serializer.Deserialize(reader);
+                string members = string.Empty;
+                string prefix = string.Empty;
+
+                foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList.Interface.Sections.Section.Member)
+                {
+                    if (member.Datatype == "Struct") prefix = member.Name + " - ";
+                    else members += prefix + member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
+
+                    if (member.Member != null) MemberRecurrence(member.Member, ref members, ref prefix);
+                }
+
+                Form window = new Form();
+                window.Width = 800;
+                window.Height = 600;
+
+                RichTextBox textBox = new RichTextBox();
+                textBox.Text = members;
+                textBox.Dock = DockStyle.Fill;
+                
+                Button btn = new Button();
+                btn.Text = "OK";
+                btn.Dock = DockStyle.Bottom;
+                btn.Click += (sender, e) => { window.Close(); };
+
+                window.Controls.Add(btn);
+                window.Controls.Add(textBox);
+                window.AcceptButton = btn;
+                window.ShowDialog();
+            }
+
+            HmiTarget hmiSoftware = GetHmiTarget(_tiaportal);
+        }
+
+
+        private void MemberRecurrence(SectionsSectionMember[] members, ref string membersText, ref string prefix)
+        {
+            foreach (SectionsSectionMember member in members)
+            {
+                if (member.Datatype == "Struct") prefix += member.Name + " - ";
+                else membersText += member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
+
+                if (member.Member != null) MemberRecurrence(member.Member, ref membersText, ref prefix);
+            }
         }
     }
 }

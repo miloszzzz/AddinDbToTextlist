@@ -29,6 +29,7 @@ using System.Globalization;
 using TiaXmlGenerator.Models;
 using DeepL;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace TiaHelperLibrary
 {
@@ -199,6 +200,7 @@ namespace TiaHelperLibrary
         /// <returns></returns>
         public static bool CheckIfPlc(Device device)
         {
+            if (device.TypeIdentifier == null) return false;
             if (device.TypeIdentifier.Contains("1500") ||
                 device.TypeIdentifier.Contains("1200") ||
                 device.TypeIdentifier.Contains("ET200"))
@@ -232,13 +234,7 @@ namespace TiaHelperLibrary
 
         public static DeviceItem GetHmiDeviceItem(Device device)
         { 
-            /*foreach (DeviceItem devi in device.DeviceItems)
-            {
-                Console.WriteLine(devi.Name + "\t" + devi.TypeIdentifier);
-                hmiDevi = devi;
-            }*/
-            DeviceItem devi = device.DeviceItems.FirstOrDefault(d => d.Name.Contains("HMI"));
-            //if (devi != null) Console.WriteLine(devi.Name);
+            var devi = device.DeviceItems.FirstOrDefault(d => !(d.GetService<SoftwareContainer>() is null));
             return devi;
         }
 

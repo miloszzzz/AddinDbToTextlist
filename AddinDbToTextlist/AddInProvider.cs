@@ -3,7 +3,7 @@ using Siemens.Engineering.AddIn;
 using Siemens.Engineering.AddIn.Menu;
 using System.Collections.Generic;
 
-namespace AddinExportAll
+namespace AddinDbToTextlist
 {
     public class AddInProvider : ProjectTreeAddInProvider //or ProjectLibraryTreeAddInProvider or GlobalLibraryTreeAddInProvider 
     {
