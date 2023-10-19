@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddinDbToTextlist", "AddinDbToTextlist\AddinDbToTextlist.csproj", "{1B59F8CA-95D7-4C7C-898A-532DF159464F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiaHelperLibrary", "TiaHelper\TiaHelperLibrary.csproj", "{CC7091C9-C59E-42BC-9AE6-308382545EFF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{94C81D43-41EB-41FA-8E46-F04BA4BAB794} = {94C81D43-41EB-41FA-8E46-F04BA4BAB794}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiaXmlGenerator", "..\TiaXmlGenerator\TiaXmlGenerator\TiaXmlGenerator.csproj", "{94C81D43-41EB-41FA-8E46-F04BA4BAB794}"
 EndProject

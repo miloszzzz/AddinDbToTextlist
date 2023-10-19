@@ -18,8 +18,18 @@ using AddinDbToTextlist.Helpers;
 using static TiaHelperLibrary.TiaHelper;
 using System.Xml.Serialization;
 using AddinDbToTextlist.Models;
-
-
+using TiaXmlGenerator;
+using TiaXmlGenerator.Models;
+using System.Globalization;
+using DeepL.Model;
+using DeepL;
+using Siemens.Engineering.Hmi.TextGraphicList;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Runtime.Remoting.Messaging;
+using TiaXmlGenerator.Helpers;
+using Language = Siemens.Engineering.Language;
+using TextBox = System.Windows.Forms.TextBox;
+using Button = System.Windows.Forms.Button;
 
 namespace AddinDbToTextlist
 {
@@ -30,6 +40,8 @@ namespace AddinDbToTextlist
         ///<para>It will be used in the TIA Add-In.</para>
         /// </summary>
         TiaPortal _tiaportal;
+        bool onlyValidValues = false;
+        bool keyDuplicated = false;
 
         /// <summary>
         /// The display name of the Add-In.
@@ -256,6 +268,12 @@ namespace AddinDbToTextlist
         public void DbToTextlist(MenuSelectionProvider menuSelectionProvider)
         {           
             PlcSoftware software = GetPlcSoftware(menuSelectionProvider);
+            List<CultureInfo> projectLanguages = new List<CultureInfo>();
+            foreach(Language language in _tiaportal.Projects.FirstOrDefault().LanguageSettings.ActiveLanguages)
+            {
+                projectLanguages.Add(language.Culture);
+            }
+            
 
             PlcBlock block = menuSelectionProvider.GetSelection<PlcBlock>().FirstOrDefault();
 
@@ -268,54 +286,317 @@ namespace AddinDbToTextlist
             string xmlData = File.ReadAllText(xmlFilePath.FullName);
 
             XmlSerializer serializer = new XmlSerializer(typeof(Document));
+            string text = string.Empty;
+            string prefix = string.Empty;
+
+            TextListGen textListGen = new TextListGen("textlist", projectLanguages.Count);
+
+
+            #region Window
+            /// 
+            /// Window with text
+            ///
+            Form window = new Form();
+            window.Width = 800;
+            window.Height = 600;
+            window.Text = "DB to Textlist";
+
+
+            /// Option checkbox
+            CheckBox checkBox = new CheckBox();
+            checkBox.Checked = true;
+            checkBox.Text = "Przepisz tylko zmienne int";
+            checkBox.Width = 250;
+            checkBox.Left = 10;
+            checkBox.Margin = new Padding(10);
+
+
+            /// Textlist name input
+            TextBox textInput = new TextBox();
+            textInput.Enabled = true;
+            textInput.MaxLength = 30;
+            textInput.Top = 30;
+            textInput.Left = 60;
+            textInput.Width = 200;
+            textInput.Margin = new Padding(10);
+
+
+            Label labelName = new Label();
+            labelName.Enabled = false;
+            labelName.Text = "Nazwa:";
+            labelName.Top = 30;
+            labelName.Left = 10;
+            labelName.Width = 50;
+
+
+            /// Button
+            Button btnOk = new Button();
+            btnOk.Text = "OK";
+            btnOk.Left = 90;
+            btnOk.Top = 60;
+            btnOk.Width = 80;
+            btnOk.Click += (sender, e) =>
+            {
+                textListGen.Name = textInput.Text;
+                onlyValidValues = checkBox.Checked;
+                window.Close();
+            };
+
+            /// Window add controls and show
+            window.Controls.Add(checkBox);
+            window.Controls.Add(labelName);
+            window.Controls.Add(textInput);
+            window.Controls.Add(btnOk);
+            window.ShowDialog();
+            #endregion
+
+            ExclusiveAccess tiaMessage = _tiaportal.ExclusiveAccess("Kopiowanie zawartości DB...");
 
             // Include Structure name?
 
             using (StringReader reader = new StringReader(xmlData))
             {
                 Document document = (Document)serializer.Deserialize(reader);
-                string members = string.Empty;
-                string prefix = string.Empty;
+                
 
                 foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList.Interface.Sections.Section.Member)
                 {
-                    if (member.Datatype == "Struct") prefix = member.Name + " - ";
-                    else members += prefix + member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
+                    prefix = string.Empty;
+                    text += member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
 
-                    if (member.Member != null) MemberRecurrence(member.Member, ref members, ref prefix);
+                    AddEntry(member, member.Name, ref textListGen);
+
+                    if (member.Member != null)
+                    {
+                        prefix = member.Name + " - ";
+                        MemberRecurrence(member.Member, ref text, ref prefix, ref textListGen);
+                    }
+
+                    if (member.Subelement != null)
+                    {
+                        prefix = member.Name;
+                        MemberRecurrence(member.Subelement, ref text, ref prefix, ref textListGen);
+                    }
+
+                    if (member.Sections != null)
+                    {
+                        prefix = member.Name + " - ";
+                        MemberRecurrence(member.Sections.Section.Member, ref text, ref prefix, ref textListGen);
+                    }
                 }
-
-                Form window = new Form();
-                window.Width = 800;
-                window.Height = 600;
-
-                RichTextBox textBox = new RichTextBox();
-                textBox.Text = members;
-                textBox.Dock = DockStyle.Fill;
-                
-                Button btn = new Button();
-                btn.Text = "OK";
-                btn.Dock = DockStyle.Bottom;
-                btn.Click += (sender, e) => { window.Close(); };
-
-                window.Controls.Add(btn);
-                window.Controls.Add(textBox);
-                window.AcceptButton = btn;
-                window.ShowDialog();
             }
 
+            text = "";
+
+            foreach (TextlistEntry entry in textListGen.Entries)
+            {
+                text += entry.Number + "\t" + entry.Texts[0] + "\n";
+            }
+
+
+            /* //debug window
+            
+
+            RichTextBox textBox = new RichTextBox();
+            textBox.Text = text;
+            textBox.Dock = DockStyle.Fill;
+
+            Button btn = new Button();
+            btn.Text = "OK";
+            btn.Dock = DockStyle.Bottom;
+            btn.Click += (sender, e) => { window.Close(); };
+
+            window.Controls.Add(btn);
+            window.Controls.Add(textBox);
+            window.AcceptButton = btn;
+            window.ShowDialog();*/
+
+            #region Textlist generate
+            /// 
+            /// TEXTLIST
+            /// 
+
+            // Add comment
+            foreach (CultureInfo culture in projectLanguages)
+            {
+                // todo comment translation?
+                textListGen.Comment.Add("Auto generated");
+            }
+
+            // Sort textlist by text number
+            textListGen.Entries = textListGen.Entries.OrderBy(e => e.Number).ToList();
+
+
+            // Adding entries to text list
+
+
+            /// 
+            /// HEADER
+            /// 
+            string xmlContant = "";
+            string tempContant = XmlHelper.TextlistHeader.Contant;
+            int id = 0;
+            tempContant = XmlHelper.InsertIds(tempContant, ref id);
+
+            List<string> comments = new List<string>();
+            foreach (CultureInfo cultureInfo in projectLanguages)
+            {
+                comments.Add("Auto generated");
+            }
+
+            tempContant = XmlHelper.InsertName(tempContant, textListGen.Name);
+            tempContant += XmlHelper.AddTextlistComment(projectLanguages, comments, ref id);
+            tempContant = XmlHelper.InsertIds(tempContant, ref id);
+            xmlContant += tempContant;
+
+
+            /// 
+            /// ENTRIES
+            /// 
+            int entryCounter = 0;
+            foreach (TextlistEntry entry in textListGen.Entries)
+            {
+                //tempContant = XmlHelper.tplTextlistEntry.Contant;
+                tempContant = XmlHelper.AddTextlistEntry(entry, projectLanguages, ref id);
+                tempContant = XmlHelper.InsertNumber(tempContant, entry.Number);
+                tempContant = XmlHelper.InsertIds(tempContant, ref id);
+                //tempContant = XmlHelper.InsertIds
+
+                xmlContant += tempContant;
+
+                tiaMessage.Text = $"Generowanie tekstów {entryCounter++} / {textListGen.Entries.Count}";
+            }
+
+
+
+            /// 
+            /// FOOTER
+            /// 
+            FileInfo newXmlFilePath = new FileInfo(Path.GetTempFileName() + ".xml");
+            xmlContant += XmlHelper.TextlistFooter.Contant;
+
+            File.WriteAllText(newXmlFilePath.FullName, xmlContant);
+            //Console.WriteLine(xmlContant);
+
+            tiaMessage.Dispose();
+
             HmiTarget hmiSoftware = GetHmiTarget(_tiaportal);
+
+            TextListComposition textListComposition = hmiSoftware.TextLists;
+            IList<TextList> importedTextLists = textListComposition.Import(new FileInfo(newXmlFilePath.FullName), ImportOptions.Override);
+
+            #endregion
+
+
+            
         }
 
 
-        private void MemberRecurrence(SectionsSectionMember[] members, ref string membersText, ref string prefix)
+        private void MemberRecurrence(SectionsSectionMember[] members, ref string membersText, ref string prefix, ref TextListGen textListGen)
         {
             foreach (SectionsSectionMember member in members)
             {
-                if (member.Datatype == "Struct") prefix += member.Name + " - ";
-                else membersText += member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
+                membersText += prefix + member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
+                string subprefix = prefix;
 
-                if (member.Member != null) MemberRecurrence(member.Member, ref membersText, ref prefix);
+                AddEntry(member, prefix + member.Name, ref textListGen);
+
+                if (member.Member != null)
+                {
+
+                    subprefix += member.Name + " - ";
+                    MemberRecurrence(member.Member, ref membersText, ref subprefix, ref textListGen);
+                }
+
+                if (member.Subelement != null)
+                {
+                    subprefix += member.Name;
+                    MemberRecurrence(member.Subelement, ref membersText, ref subprefix, ref textListGen);
+                }
+
+                if (member.Sections != null)
+                {
+                    subprefix += member.Name + " - ";
+                    MemberRecurrence(member.Sections.Section.Member, ref membersText, ref subprefix, ref textListGen);
+                }
+            }
+        }
+
+
+        private void MemberRecurrence(SectionsSectionMemberSubelement[] members, ref string membersText, ref string prefix, ref TextListGen textListGen)
+        {
+            
+            foreach (SectionsSectionMemberSubelement subElement in members)
+            {
+                membersText += prefix + "[" + subElement.Path + "]" + "\t" + subElement.StartValue + "\n";
+            }
+        }
+
+
+        private void AddEntry(SectionsSectionMember member, string text, ref TextListGen textListGen)
+        {
+            if (onlyValidValues)
+            {
+                if (!CheckIfInt(member.Datatype)) return;
+                if (textListGen.Entries.Any(e => e.Number == member.StartValue)) keyDuplicated = true;
+                else
+                {
+                    TextlistEntry newEntry = new TextlistEntry(textListGen.CulturesNumber);
+                    newEntry.Texts = newEntry.Texts.Select(t => text).ToList();
+                    newEntry.Number = member.StartValue;
+                    textListGen.Entries.Add(newEntry);
+                }
+            }
+            else
+            {
+                if (textListGen.Entries.Any(e => e.Number == member.StartValue)) keyDuplicated = true;
+                TextlistEntry newEntry = new TextlistEntry(textListGen.CulturesNumber);
+                newEntry.Texts = newEntry.Texts.Select(t => text).ToList();
+                newEntry.Number = member.StartValue;
+                textListGen.Entries.Add(newEntry);
+            }
+        }
+
+
+        private bool CheckIfInt(string datatype)
+        {
+            switch (datatype)
+            {
+                case "Int":
+                    return true;
+
+                case "UInt":
+                    return true;
+
+                case "SInt":
+                    return true;
+
+                case "USInt":
+                    return true;
+
+                case "LInt":
+                    return true;
+
+                case "ULInt":
+                    return true;
+
+                case "DInt":
+                    return true;
+
+                case "UDInt":
+                    return true;
+
+                case "Byte":
+                    return true;
+
+                case "Word":
+                    return true;
+
+                case "DWord":
+                    return true;
+
+                default:
+                    return false;
             }
         }
     }
