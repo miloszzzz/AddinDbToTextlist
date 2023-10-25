@@ -27,7 +27,6 @@ using TiaHelperLibrary.Enums;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using TiaXmlGenerator.Models;
-using DeepL;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -895,11 +894,9 @@ namespace TiaHelperLibrary
         {
             List<CultureInfo> cultureList = new List<CultureInfo>();
 
-            LanguageSettings languageSettings = project.LanguageSettings;
-            LanguageAssociation activeLanguages = languageSettings.ActiveLanguages;
-            foreach (Language lang in activeLanguages)
+            foreach (Language language in project.LanguageSettings.ActiveLanguages)
             {
-                cultureList.Add(lang.Culture);
+                cultureList.Add(language.Culture);
             }
 
             return cultureList;
@@ -940,6 +937,40 @@ namespace TiaHelperLibrary
             {
                 Console.WriteLine(compositionInfo.Name);
             }
+        }
+
+
+        public static string SeparateWords(string text)
+        {
+            if (text is null) return text;
+            if (text.Length < 2) return text;
+
+            StringBuilder stringBuilder = new StringBuilder(text);
+
+            for (int i = 1; i < stringBuilder.Length - 1; i++)
+            {
+                if (stringBuilder[i] == '_') 
+                {
+                    stringBuilder.Replace('_', ' ', i, 1);
+                    continue;
+                }
+
+                if (char.IsLower(stringBuilder[i])) continue;
+                if (char.IsWhiteSpace(stringBuilder[i])) continue;
+                if (char.IsWhiteSpace(stringBuilder[i - 1])) continue;
+                if (char.IsWhiteSpace(stringBuilder[i + 1])) continue;
+                if (char.IsUpper(stringBuilder[i - 1])) continue;
+                if (char.IsUpper(stringBuilder[i + 1])) continue;
+                if (char.IsDigit(stringBuilder[i])) continue;
+                if (char.IsDigit(stringBuilder[i + 1])) continue;
+
+                {
+                    stringBuilder[i] = char.ToLower(stringBuilder[i]);
+                    stringBuilder.Insert(i, ' ');
+                }
+            }
+
+            return stringBuilder.ToString();
         }
 
 

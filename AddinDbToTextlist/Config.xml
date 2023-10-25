@@ -16,11 +16,14 @@
     </AssemblyInfo>
   </FeatureAssembly>
 	<AdditionalAssemblies>
-		<AssemblyInfo>
-			<Assembly>bin\Debug\TiaHelperLibrary.dll</Assembly>
-			<Pdb>bin\Debug\TiaHelperLibrary.pdb</Pdb>
-		</AssemblyInfo>
-		
+	    <AssemblyInfo>
+		    <Assembly>bin\Debug\TiaHelperLibrary.dll</Assembly>
+		    <Pdb>bin\Debug\TiaHelperLibrary.pdb</Pdb>
+	    </AssemblyInfo>
+        <AssemblyInfo>
+			    <Assembly>bin\Debug\TiaXmlGenerator.dll</Assembly>
+          <Pdb>bin\Debug\TiaXmlGenerator.pdb</Pdb>
+		    </AssemblyInfo>
 	</AdditionalAssemblies>
 
   <RequiredPermissions>

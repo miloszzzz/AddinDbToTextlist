@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace AddinDbToTextlist.Models
 {
@@ -253,7 +248,7 @@ namespace AddinDbToTextlist.Models
 
         private DocumentSWBlocksGlobalDBMultilingualText[] objectListField;
 
-        private byte idField;
+        private string idField;
 
         /// <remarks/>
         public DocumentSWBlocksGlobalDBAttributeList AttributeList
@@ -284,7 +279,7 @@ namespace AddinDbToTextlist.Models
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte ID
+        public string ID
         {
             get
             {
@@ -322,7 +317,7 @@ namespace AddinDbToTextlist.Models
 
         private object headerNameField;
 
-        private decimal headerVersionField;
+        private string headerVersionField;
 
         private DocumentSWBlocksGlobalDBAttributeListInterface interfaceField;
 
@@ -342,13 +337,13 @@ namespace AddinDbToTextlist.Models
 
         private string memoryLayoutField;
 
-        private byte memoryReserveField;
+        private int memoryReserveField;
 
         private DocumentSWBlocksGlobalDBAttributeListModifiedDate modifiedDateField;
 
         private string nameField;
 
-        private byte numberField;
+        private int numberField;
 
         private DocumentSWBlocksGlobalDBAttributeListParameterModified parameterModifiedField;
 
@@ -474,7 +469,7 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
-        public decimal HeaderVersion
+        public string HeaderVersion
         {
             get
             {
@@ -604,7 +599,7 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
-        public byte MemoryReserve
+        public int MemoryReserve
         {
             get
             {
@@ -643,7 +638,7 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
-        public byte Number
+        public int Number
         {
             get
             {
@@ -952,7 +947,7 @@ namespace AddinDbToTextlist.Models
 
         private SectionsSectionMemberBooleanAttribute[] attributeListField;
 
-        private short startValueField;
+        private string startValueField;
 
         private bool startValueFieldSpecified;
 
@@ -961,6 +956,8 @@ namespace AddinDbToTextlist.Models
         private SectionsSectionMemberSubelement[] subelementField;
 
         private SectionsSectionMember[] memberField;
+
+        private SectionsSectionMemberMultiLanguageText[] commentField;
 
         private string nameField;
 
@@ -985,7 +982,7 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
-        public short StartValue
+        public string StartValue
         {
             get
             {
@@ -1053,6 +1050,20 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
+        [System.Xml.Serialization.XmlArrayItemAttribute("MultiLanguageText", IsNullable = false)]
+        public SectionsSectionMemberMultiLanguageText[] Comment
+        {
+            get
+            {
+                return this.commentField;
+            }
+            set
+            {
+                this.commentField = value;
+            }
+        }
+
+        /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
         public string Name
         {
@@ -1108,6 +1119,47 @@ namespace AddinDbToTextlist.Models
             }
         }
     }
+
+    /// <remarks/>
+    [System.SerializableAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.siemens.com/automation/Openness/SW/Interface/v4")]
+    public partial class SectionsSectionMemberMultiLanguageText
+    {
+
+        private string langField;
+
+        private string valueField;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string Lang
+        {
+            get
+            {
+                return this.langField;
+            }
+            set
+            {
+                this.langField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlTextAttribute()]
+        public string Value
+        {
+            get
+            {
+                return this.valueField;
+            }
+            set
+            {
+                this.valueField = value;
+            }
+        }
+    }
+
 
     /// <remarks/>
     [System.SerializableAttribute()]
@@ -1615,12 +1667,12 @@ namespace AddinDbToTextlist.Models
     public partial class SectionsSectionMemberSectionsSectionMemberSubelement
     {
 
-        private byte startValueField;
+        private string startValueField;
 
-        private byte pathField;
+        private string pathField;
 
         /// <remarks/>
-        public byte StartValue
+        public string StartValue
         {
             get
             {
@@ -1634,7 +1686,7 @@ namespace AddinDbToTextlist.Models
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte Path
+        public string Path
         {
             get
             {
@@ -1653,13 +1705,14 @@ namespace AddinDbToTextlist.Models
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.siemens.com/automation/Openness/SW/Interface/v4")]
     public partial class SectionsSectionMemberSubelement
     {
+        private SectionsSectionMemberMultiLanguageText[] commentField;
 
-        private byte startValueField;
+        private string startValueField;
 
-        private byte pathField;
+        private string pathField;
 
         /// <remarks/>
-        public byte StartValue
+        public string StartValue
         {
             get
             {
@@ -1673,7 +1726,7 @@ namespace AddinDbToTextlist.Models
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte Path
+        public string Path
         {
             get
             {
@@ -1682,6 +1735,20 @@ namespace AddinDbToTextlist.Models
             set
             {
                 this.pathField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("MultiLanguageText")]
+        public SectionsSectionMemberMultiLanguageText[] Comment
+        {
+            get
+            {
+                return this.commentField;
+            }
+            set
+            {
+                this.commentField = value;
             }
         }
     }
@@ -1695,7 +1762,7 @@ namespace AddinDbToTextlist.Models
 
         private SectionsSectionMemberMemberBooleanAttribute[] attributeListField;
 
-        private ushort startValueField;
+        private string startValueField;
 
         private string nameField;
 
@@ -1716,7 +1783,7 @@ namespace AddinDbToTextlist.Models
         }
 
         /// <remarks/>
-        public ushort StartValue
+        public string StartValue
         {
             get
             {
@@ -2134,7 +2201,7 @@ namespace AddinDbToTextlist.Models
 
         private DocumentSWBlocksGlobalDBMultilingualTextMultilingualTextItem[] objectListField;
 
-        private byte idField;
+        private string idField;
 
         private string compositionNameField;
 
@@ -2154,7 +2221,7 @@ namespace AddinDbToTextlist.Models
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte ID
+        public string ID
         {
             get
             {
@@ -2190,7 +2257,7 @@ namespace AddinDbToTextlist.Models
 
         private DocumentSWBlocksGlobalDBMultilingualTextMultilingualTextItemAttributeList attributeListField;
 
-        private byte idField;
+        private string idField;
 
         private string compositionNameField;
 
@@ -2209,7 +2276,7 @@ namespace AddinDbToTextlist.Models
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte ID
+        public string ID
         {
             get
             {
