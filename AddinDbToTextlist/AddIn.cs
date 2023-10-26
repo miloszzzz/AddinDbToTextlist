@@ -38,11 +38,12 @@ namespace AddinDbToTextlist
         //bool translate = false;
         CultureInfo selectedLanguage = new CultureInfo("en-US");
         public List<CultureInfo> projectLanguages = new List<CultureInfo>(10);
+        public ExclusiveAccess tiaMessage;
 
         /// <summary>
         /// The display name of the Add-In.
         /// </summary>
-        private const string s_DisplayNameOfAddIn = "PhiTools";
+        private const string s_DisplayNameOfAddIn = "Textlisty";
 
         /// <summary>
         /// The constructor of the AddIn.
@@ -104,18 +105,20 @@ namespace AddinDbToTextlist
              *          displayed if a rightclick on the project name 
              *          will be performed in TIA Portal
             */
-            /*addInRootSubmenu.Items.AddActionItem<Project>(
-                "Test", OnDoSomething, OnCanSomething);*/
+            addInRootSubmenu.Items.AddActionItem<Project>(
+                "DbToTextlist - DB", OnDoSomething, OnCanSomething);
 
-            /*addInRootSubmenu.Items.AddActionItem<DeviceItem>(
-                "Test", OnDoSomething, OnCanSomething);*/
+            addInRootSubmenu.Items.AddActionItem<DeviceItem>(
+                "DbToTextlist - DB", OnDoSomething, OnCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<PlcBlock>(
                 "DbToTextlist", OnDoSomething, OnCanSomething);
 
-            /*addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
-                "Test", OnDoSomething, OnCanSomething);*/
+            addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
+                "DbToTextlist - DB", OnDoSomething, OnCanSomething);
         }
+
+        #region DoSomething
 
         /// <summary>
         /// The method contains the program code of the TIA Add-In.
@@ -128,27 +131,27 @@ namespace AddinDbToTextlist
         private void OnDoSomething(MenuSelectionProvider<Project>
             menuSelectionProvider)
         {
-            try
+            /*try
             {
                 DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex) 
             { 
                 LogToFile.Save(ex); 
-            }
+            }*/
         }
 
         private void OnDoSomething(MenuSelectionProvider<DeviceItem>
             menuSelectionProvider)
         {
-            try
+            /*try
             {
                 DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex)
             {
                 LogToFile.Save(ex);
-            }
+            }*/
         }
 
         private void OnDoSomething(MenuSelectionProvider<PlcBlock>
@@ -160,24 +163,32 @@ namespace AddinDbToTextlist
             }
             catch (Exception ex)
             {
-                LogToFile.Save(ex);
-                _tiaportal.Dispose();
+                if (ex.Message == "Addin canceled") _tiaportal.Dispose();
+                else
+                {
+                    LogToFile.Save(ex);
+                    _tiaportal.Dispose();
+                }
             }
         }
 
         private void OnDoSomething(MenuSelectionProvider<PlcBlockGroup>
             menuSelectionProvider)
         {
-            try
+            /*try
             {
                 DbToTextlist(menuSelectionProvider);
             }
             catch (Exception ex)
             {
                 LogToFile.Save(ex);
-            }
+            }*/
         }
 
+        #endregion
+
+
+        #region CanSomething
         /// <summary>
         /// Called when there is a mousover the button at a DeviceItem.
         /// It will be used to enable the button.
@@ -217,7 +228,7 @@ namespace AddinDbToTextlist
             //enable the button
             return MenuStatus.Disabled;
         }
-
+        #endregion
 
         /// <summary>
         /// This method will be invoked by the TIA Add-In Tester. The return value of this
@@ -251,12 +262,11 @@ namespace AddinDbToTextlist
 
 
 
-        private static bool CheckCancellation(ExclusiveAccess accesWindow)
+        public bool CheckCancellation()
         {
-            if (accesWindow.IsCancellationRequested)
+            if (tiaMessage.IsCancellationRequested)
             {
-                accesWindow.Dispose();
-                return true;
+                throw new Exception("Addin canceled");
             }
             return false;
         }
@@ -376,7 +386,7 @@ namespace AddinDbToTextlist
             #endregion
 
             /// Exclusive access window
-            ExclusiveAccess tiaMessage = _tiaportal.ExclusiveAccess("Kopiowanie zawartości DB...");
+            tiaMessage = _tiaportal.ExclusiveAccess("Kopiowanie zawartości DB...");
 
             // Include Structure name?
 
@@ -438,11 +448,12 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
             text = "";
             int sourceLangId = projectLanguages.IndexOf(selectedLanguage);
 
+            /*
             foreach (TextlistEntry entry in textListGen.Entries)
             {
                 text += entry.Number + "\t" + entry.Texts[0] + "\n";
 
-                /*if (translate)
+                if (translate)
                 {
                     foreach (CultureInfo language in projectLanguages)
                     {
@@ -460,9 +471,9 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
 
                         }
                     }
-                }*/
+                }
             }
-
+        */
 
             /* //debug window
             
@@ -495,7 +506,7 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
 
             // Sort textlist by text number
             textListGen.Entries = textListGen.Entries.OrderBy(e => e.Number).ToList();
-            
+            CheckCancellation();
 
             // Adding entries to text list
 
@@ -518,18 +529,31 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
             tempContant += XmlHelper.AddTextlistComment(projectLanguages, comments, ref id);
             tempContant = XmlHelper.InsertIds(tempContant, ref id);
             xmlContant += tempContant;
-
+            CheckCancellation();
 
             /// 
             /// ENTRIES
             /// 
             int entryCounter = 0;
+            decimal allEntries = (decimal)textListGen.Entries.Count;
+            decimal procent = 0m;
+            decimal procentMemo = 0m;
             foreach (TextlistEntry entry in textListGen.Entries)
             {
                 tempContant = XmlHelper.AddTextlistEntry(entry, projectLanguages, ref id, true);
                 xmlContant += tempContant;
 
-                tiaMessage.Text = $"Generowanie tekstów {entryCounter++} / {textListGen.Entries.Count}";
+                if (entryCounter % 10 == 0)
+                {
+                    procent = (decimal)entryCounter / allEntries;
+                    if (procent > procentMemo + 0.009m)
+                    {
+                        tiaMessage.Text = $"Generowanie tekstów {procent:P}";
+                        procentMemo = procent;
+                    }
+                    CheckCancellation();
+                }
+                entryCounter++;
             }
 
 
@@ -554,15 +578,21 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
 
             #endregion
 
-            if (keyDuplicated) MessageBox.Show("Textlista zawiera zduplikowane wartości!");
+            if (keyDuplicated) MessageBox.Show($"Textlista zawiera zduplikowane wartości!\n Liczba tekstów: {textListGen.Entries.Count}");
         }
 
 
         private void MemberRecurrence(SectionsSectionMember[] members, ref string membersText, ref string prefix, ref TextListGen textListGen)
         {
             string entry_text = string.Empty;
+            if (members.Length > 0)
+            {
+                tiaMessage.Text = $"Kopiowanie zawartości DB... {prefix}";
+                CheckCancellation();
+            }
 
-            foreach (SectionsSectionMember member in members)
+
+                foreach (SectionsSectionMember member in members)
             {
                 TextlistEntry entry = new TextlistEntry(textListGen.CulturesNumber);
                 membersText += prefix + member.Name + "\t" + member.Datatype + "\t" + member.StartValue + "\n";
@@ -592,6 +622,7 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
                         catch
                         {
                             text = SeparateWords(prefix + member.Name);
+                            
                         }
                         
                         entry.Texts[i] = text;
@@ -637,6 +668,7 @@ foreach (SectionsSectionMember member in document.SWBlocksGlobalDB.AttributeList
         private void MemberRecurrence(SectionsSectionMemberSubelement[] members, ref string membersText, ref string prefix, ref TextListGen textListGen)
         {
             string entry_text = string.Empty;
+            //CheckCancellation();
 
             foreach (SectionsSectionMemberSubelement subElement in members)
             {
