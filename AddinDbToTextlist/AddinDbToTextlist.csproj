@@ -81,7 +81,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TiaHelper\TiaHelperLibrary.csproj">
+    <ProjectReference Include="..\..\TiaHelper\TiaHelper\TiaHelper\TiaHelperLibrary.csproj">
       <Project>{cc7091c9-c59e-42bc-9ae6-308382545eff}</Project>
       <Name>TiaHelperLibrary</Name>
     </ProjectReference>

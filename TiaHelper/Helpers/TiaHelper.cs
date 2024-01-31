@@ -947,6 +947,8 @@ namespace TiaHelperLibrary
 
             StringBuilder stringBuilder = new StringBuilder(text);
 
+            bool isDigit, isDigitNext, isWhiteSpace, isWhiteSpaceNext, isWhiteSpacePrev;
+
             for (int i = 1; i < stringBuilder.Length - 1; i++)
             {
                 if (stringBuilder[i] == '_') 
