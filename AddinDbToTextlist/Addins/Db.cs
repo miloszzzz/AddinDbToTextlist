@@ -341,6 +341,7 @@ if (member.Sections != null)
             #endregion
 
             if (keyDuplicated) MessageBox.Show($"Textlista zawiera zduplikowane wartości!\n Liczba tekstów: {textListGen.Entries.Count}");
+            else MessageBox.Show($"Liczba tekstów: {textListGen.Entries.Count}");
         }
 
 
