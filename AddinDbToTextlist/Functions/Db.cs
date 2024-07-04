@@ -1,5 +1,4 @@
-﻿using AddinDbToTextlist.Models;
-using Siemens.Engineering.AddIn.Menu;
+﻿using Siemens.Engineering.AddIn.Menu;
 using Siemens.Engineering.Hmi.TextGraphicList;
 using Siemens.Engineering.Hmi;
 using Siemens.Engineering.SW.Blocks;
@@ -18,6 +17,7 @@ using System.Xml.Serialization;
 using TiaXmlGenerator.Models;
 using TiaXmlGenerator;
 using static TiaHelperLibrary.TiaHelper;
+using TiaHelperLibrary.Models.DB;
 
 namespace AddinDbToTextlist.Functions
 {

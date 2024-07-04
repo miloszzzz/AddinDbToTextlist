@@ -4,24 +4,14 @@ using Siemens.Engineering.HW;
 using Siemens.Engineering.SW;
 using Siemens.Engineering;
 using Siemens.Engineering.Hmi;
-using System.Windows.Forms;
 using Siemens.Engineering.SW.Blocks;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System;
 using static TiaHelperLibrary.TiaHelper;
-using TiaXmlGenerator;
 using AddinDbToTextlist.Helpers;
-using System.Xml.Serialization;
-using AddinDbToTextlist.Models;
-using TiaXmlGenerator.Models;
 using System.Globalization;
-using Siemens.Engineering.Hmi.TextGraphicList;
-using TextBox = System.Windows.Forms.TextBox;
-using Button = System.Windows.Forms.Button;
 using AddinDbToTextlist.Functions;
-using Siemens.Engineering.Hmi.Screen;
 
 
 //$(ProjectDir)\AfterCompilation.bat $(ProjectDir) C:\Net\TiaAddInTester\bin

@@ -55,12 +55,11 @@
   <ItemGroup>
     <Compile Include="AddIn.cs" />
     <Compile Include="AddInProvider.cs" />
-    <Compile Include="Addins\Db.cs" />
+    <Compile Include="Functions\Db.cs" />
     <Compile Include="Helpers\LogToFile.cs" />
-    <Compile Include="Models\StatusDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />
-    <Compile Include="Addins\ScreenAddin.cs" />
+    <Compile Include="Functions\ScreenAddin.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config.xml" />
@@ -87,6 +86,9 @@
       <Project>{cc7091c9-c59e-42bc-9ae6-308382545eff}</Project>
       <Name>TiaHelperLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
