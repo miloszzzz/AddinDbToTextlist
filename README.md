@@ -17,10 +17,10 @@ C:\Program Files\Siemens\Automation\Portal V16\AddIns
 
 ## Using
 
-1. Right click on data block (DB) or HMI screen, start addin from 'Textlists' dropdown.
+1. Right click on data block (DB) or HMI screen, start addin from 'Textlists' dropdown.    
 ![image](https://github.com/miloszzzz/AddinDbToTextlist/assets/79056094/20573e93-f49f-49ac-ab34-83be98768cce)
 
-2. Write text list name, optionally turn off 'Rewrite only integers' option (without this option addin will rewrite any variable and assign value 0)
+2. Write text list name, optionally turn off 'Rewrite only integers' option (without this option addin will rewrite any variable and assign value 0)    
 ![image](https://github.com/miloszzzz/AddinDbToTextlist/assets/79056094/2d880cda-0a07-4dea-8365-6a40adf23104)
 
 3. Click OK and wait for addin to finish work.                                    
