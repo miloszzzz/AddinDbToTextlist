@@ -54,13 +54,13 @@ namespace AddinDbToTextlist.Functions
 
             if (!block.IsConsistent)
             {
-                MessageBox.Show("Blok nieskompilowany!");
+                MessageBox.Show("Block not compiled!");
                 return;
             }
 
             if (block is InstanceDB)
             {
-                MessageBox.Show("Instancje nie są obsługiwane!");
+                MessageBox.Show("Instances are not supported!");
                 return;
             }
 
@@ -97,7 +97,7 @@ namespace AddinDbToTextlist.Functions
             /// Option checkbox
             CheckBox checkBox = new CheckBox();
             checkBox.Checked = true;
-            checkBox.Text = "Przepisz tylko zmienne całkowite";
+            checkBox.Text = "Rewrite only integers";
             checkBox.Width = 250;
             checkBox.Left = 10;
             checkBox.Margin = new Padding(10);
@@ -115,7 +115,7 @@ namespace AddinDbToTextlist.Functions
 
             Label labelName = new Label();
             labelName.Enabled = false;
-            labelName.Text = "Nazwa:";
+            labelName.Text = "Name:";
             labelName.Top = 30;
             labelName.Left = 10;
             labelName.Width = 50;
@@ -148,7 +148,7 @@ namespace AddinDbToTextlist.Functions
             #endregion
 
             /// Exclusive access window
-            tiaMessage = _tiaportal.ExclusiveAccess("Kopiowanie zawartości DB...");
+            tiaMessage = _tiaportal.ExclusiveAccess("Copying DB content...");
 
             // Include Structure name?
 
@@ -310,7 +310,7 @@ if (member.Sections != null)
                     procent = (decimal)entryCounter / allEntries;
                     if (procent > procentMemo + 0.009m)
                     {
-                        tiaMessage.Text = $"Generowanie tekstów {procent:P}";
+                        tiaMessage.Text = $"Generating texts {procent:P}";
                         procentMemo = procent;
                     }
                     CheckCancellation();
@@ -340,8 +340,8 @@ if (member.Sections != null)
 
             #endregion
 
-            if (keyDuplicated) MessageBox.Show($"Textlista zawiera zduplikowane wartości!\n Liczba tekstów: {textListGen.Entries.Count}");
-            else MessageBox.Show($"Liczba tekstów: {textListGen.Entries.Count}");
+            if (keyDuplicated) MessageBox.Show($"Textlist contains duplicated values!\n Lines: {textListGen.Entries.Count}");
+            else MessageBox.Show($"Lines: {textListGen.Entries.Count}");
         }
 
 
@@ -350,7 +350,7 @@ if (member.Sections != null)
             string entry_text = string.Empty;
             if (members.Length > 0)
             {
-                tiaMessage.Text = $"Kopiowanie zawartości DB... {prefix}";
+                tiaMessage.Text = $"Copying DB content... {prefix}";
                 CheckCancellation();
             }
 

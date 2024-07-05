@@ -36,7 +36,7 @@ namespace AddinDbToTextlist
         /// <summary>
         /// The display name of the Add-In.
         /// </summary>
-        private const string s_DisplayNameOfAddIn = "Textlisty";
+        private const string s_DisplayNameOfAddIn = "Textlists";
 
         /// <summary>
         /// The constructor of the AddIn.
@@ -99,31 +99,31 @@ namespace AddinDbToTextlist
              *          will be performed in TIA Portal
             */
             addInRootSubmenu.Items.AddActionItem<Project>(
-                "DbToTextlist - DB", DbDoSomething, DbCanSomething);
+                "Db to textlist - DB", DbDoSomething, DbCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<DeviceItem>(
-                "DbToTextlist - DB", DbDoSomething, DbCanSomething);
+                "Db to textlist - DB", DbDoSomething, DbCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<PlcBlock>(
-                "DbToTextlist", DbDoSomething, DbCanSomething);
+                "Db to textlist", DbDoSomething, DbCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
-                "DbToTextlist - DB", DbDoSomething, DbCanSomething);
-            /*
+                "Db to textlist - DB", DbDoSomething, DbCanSomething);
+            
             addInRootSubmenu.Items.AddActionItem<Project>(
-                "ScreensToTextlist - Screen", ScreenDoSomething, ScreenCanSomething);
+                "Screens to textlist - Screen", ScreenDoSomething, ScreenCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<DeviceItem>(
-                "Screens", ScreenDoSomething, ScreenCanSomething);
+                "Screens to textlist - Screen", ScreenDoSomething, ScreenCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<PlcBlock>(
-                "Screens", ScreenDoSomething, ScreenCanSomething);
+                "Screens to textlist - Screen", ScreenDoSomething, ScreenCanSomething);
 
             addInRootSubmenu.Items.AddActionItem<PlcBlockGroup>(
-                "Screens", ScreenDoSomething, ScreenCanSomething);
-            */
+                "Screens to textlist - Screen", ScreenDoSomething, ScreenCanSomething);
+            
             addInRootSubmenu.Items.AddActionItem<Siemens.Engineering.Hmi.Screen.Screen>(
-                "Screens", ScreenDoSomething, ScreenCanSomething);
+                "Screens to textlist", ScreenDoSomething, ScreenCanSomething);
         }
 
         #region DoSomething
@@ -357,7 +357,7 @@ namespace AddinDbToTextlist
 
             switch (label)
             {
-                case "DbToTextlist":
+                case "Db to textlist":
                     /*var myPlc = project
                          .Devices[1]
                         .DeviceItems.FirstOrDefault(plc => plc.Name.Length > 0)
@@ -366,7 +366,7 @@ namespace AddinDbToTextlist
                     PlcBlockGroup blockGroup = GetGroupByBlockName(software.BlockGroup, "DB_StatusDef");
                     return blockGroup.Blocks.Where<PlcBlock>(b => b.ProgrammingLanguage == ProgrammingLanguage.DB);
 
-                case "Screens":
+                case "Screens to textlist":
                     HmiTarget target = GetHmiTarget(_tiaportal);
                     return target.ScreenFolder.Screens;
 

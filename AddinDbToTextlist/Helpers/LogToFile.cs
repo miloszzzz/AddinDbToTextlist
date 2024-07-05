@@ -17,8 +17,8 @@ namespace AddinDbToTextlist.Helpers
             {
                 default:
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.Filter = "Pliki tekstowe (*.txt)|*.txt";
-                    saveFileDialog.Title = "Zapisz plik log";
+                    saveFileDialog.Filter = "Text files (*.txt)|*.txt";
+                    saveFileDialog.Title = "Save log file";
                     saveFileDialog.FileName = "log.txt";
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
@@ -29,31 +29,31 @@ namespace AddinDbToTextlist.Helpers
                         {
                             using (StreamWriter writer = new StreamWriter(filePath))
                             {
-                                writer.WriteLine("Data: " + DateTime.Now);
-                                writer.WriteLine("Wyjątek: " + ex.GetType());
-                                writer.WriteLine("Wiadomość: " + ex.Message);
-                                writer.WriteLine("Źródło: " + ex.Source);
-                                writer.WriteLine("Źródło trace: " + ex.StackTrace);
+                                writer.WriteLine("Date: " + DateTime.Now);
+                                writer.WriteLine("Exception: " + ex.GetType());
+                                writer.WriteLine("Message: " + ex.Message);
+                                writer.WriteLine("Source: " + ex.Source);
+                                writer.WriteLine("Stack trace: " + ex.StackTrace);
 
                                 // Dodaj dodatkowe informacje, jeśli są dostępne
                                 if (ex.InnerException != null)
                                 {
-                                    writer.WriteLine("Wewnętrzny wyjątek:");
-                                    writer.WriteLine("Wyjątek: " + ex.ToString());
-                                    writer.WriteLine("Wiadomość: " + ex.InnerException.Message);
-                                    writer.WriteLine("Źródło: " + ex.InnerException.Source);
-                                    writer.WriteLine("Źródło trace: " + ex.InnerException.StackTrace);
+                                    writer.WriteLine("Internal exception:");
+                                    writer.WriteLine("Exception: " + ex.ToString());
+                                    writer.WriteLine("Message: " + ex.InnerException.Message);
+                                    writer.WriteLine("Source: " + ex.InnerException.Source);
+                                    writer.WriteLine("Stack trace: " + ex.InnerException.StackTrace);
                                 }
 
                                 writer.WriteLine();
-                                writer.WriteLine("--- Koniec logu ---");
+                                writer.WriteLine("--- Log end ---");
                             }
 
-                            MessageBox.Show("Plik log został zapisany.");
+                            MessageBox.Show("Log file was saved.");
                         }
                         catch (Exception)
                         {
-                            MessageBox.Show("Wystąpił błąd podczas zapisu pliku log.");
+                            MessageBox.Show("Error occured during log file save.");
                         }
                     }
                     return;
