@@ -4,7 +4,7 @@
 
 ## TIA Portal version
 
-Addin was created for V16 version. Only screen names copying can work in V17 and V18 at the current state (differences in exported XML files are the problem).
+Addin was created for TIA Portal V16. Only screen names copying can work in V17 and V18 at the current state (differences in exported XML files are the problem).
 
 ## Installation
 
